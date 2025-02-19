@@ -80,7 +80,7 @@ public class MainApplicationFrame extends JFrame
 //        menuItem.setAccelerator(KeyStroke.getKeyStroke(
 //                KeyEvent.VK_N, ActionEvent.ALT_MASK));
 //        menuItem.setActionCommand("new");
-////        menuItem.addActionListener(this);
+//        menuItem.addActionListener(this);
 //        menu.add(menuItem);
 // 
 //        //Set up the second menu item.
@@ -89,7 +89,7 @@ public class MainApplicationFrame extends JFrame
 //        menuItem.setAccelerator(KeyStroke.getKeyStroke(
 //                KeyEvent.VK_Q, ActionEvent.ALT_MASK));
 //        menuItem.setActionCommand("quit");
-////        menuItem.addActionListener(this);
+//        menuItem.addActionListener(this);
 //        menu.add(menuItem);
 // 
 //        return menuBar;

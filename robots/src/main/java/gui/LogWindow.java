@@ -1,5 +1,7 @@
 package gui;
 
+import log.LogWindowSource;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.TextArea;
@@ -9,7 +11,6 @@ import javax.swing.JPanel;
 
 import log.LogChangeListener;
 import log.LogEntry;
-import log.LogWindowSource;
 
 public class LogWindow extends JInternalFrame implements LogChangeListener
 {
