@@ -15,6 +15,10 @@ public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
 
     public MainApplicationFrame() {
+        JFrame frame = new JFrame();
+        frame.setState(Frame.ICONIFIED);
+        frame.setUndecorated(true);
+
         //Make the big window be indented 50 pixels from each edge
         //of the screen.
         int inset = 50;
@@ -22,7 +26,6 @@ public class MainApplicationFrame extends JFrame {
         setBounds(inset, inset,
                 screenSize.width - inset * 2,
                 screenSize.height - inset * 2);
-
         setContentPane(desktopPane);
 
         LogWindow logWindow = createLogWindow();
@@ -35,10 +38,15 @@ public class MainApplicationFrame extends JFrame {
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-        setUndecorated(true);
         // Панель заголовка
         JPanel titleBar = new JPanel();
 
+        JPanel buttonPanel = getButtonPanel();
+
+        titleBar.add(buttonPanel, BorderLayout.EAST);
+    }
+
+    private JPanel getButtonPanel() {
         JButton closeButton = new JButton("Закрыть");
         JButton minimizeButton = new JButton("Свернуть");
         JButton maximizeButton = new JButton("Развернуть");
@@ -46,7 +54,8 @@ public class MainApplicationFrame extends JFrame {
         // Обработчики кнопок
         closeButton.addActionListener(e -> System.exit(0));
         minimizeButton.addActionListener(e -> setState(JFrame.ICONIFIED));
-        maximizeButton.addActionListener(e -> setExtendedState(getExtendedState() == JFrame.MAXIMIZED_BOTH ? JFrame.NORMAL : JFrame.MAXIMIZED_BOTH));
+        maximizeButton.addActionListener(e ->
+                setExtendedState(getExtendedState() == JFrame.MAXIMIZED_BOTH ? JFrame.NORMAL : JFrame.MAXIMIZED_BOTH));
 
         // Панель кнопок справа
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 2));
@@ -54,8 +63,7 @@ public class MainApplicationFrame extends JFrame {
         buttonPanel.add(minimizeButton);
         buttonPanel.add(maximizeButton);
         buttonPanel.add(closeButton);
-
-        titleBar.add(buttonPanel, BorderLayout.EAST);
+        return buttonPanel;
     }
 
     protected LogWindow createLogWindow() {
@@ -72,6 +80,35 @@ public class MainApplicationFrame extends JFrame {
         desktopPane.add(frame);
         frame.setVisible(true);
     }
+
+//    protected JMenuBar createMenuBar() {
+//        JMenuBar menuBar = new JMenuBar();
+//
+//        //Set up the lone menu.
+//        JMenu menu = new JMenu("Document");
+//        menu.setMnemonic(KeyEvent.VK_D);
+//        menuBar.add(menu);
+//
+//        //Set up the first menu item.
+//        JMenuItem menuItem = new JMenuItem("New");
+//        menuItem.setMnemonic(KeyEvent.VK_N);
+//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+//                KeyEvent.VK_N, ActionEvent.ALT_MASK));
+//        menuItem.setActionCommand("new");
+//        menuItem.addActionListener(this);
+//        menu.add(menuItem);
+//
+//        //Set up the second menu item.
+//        menuItem = new JMenuItem("Quit");
+//        menuItem.setMnemonic(KeyEvent.VK_Q);
+//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+//                KeyEvent.VK_Q, ActionEvent.ALT_MASK));
+//        menuItem.setActionCommand("quit");
+//        menuItem.addActionListener(this);
+//        menu.add(menuItem);
+//
+//        return menuBar;
+//    }
 
     private JMenuBar generateMenuBar() {
         JMenu lookAndFeelMenu = new JMenu("Режим отображения");
@@ -132,6 +169,7 @@ public class MainApplicationFrame extends JFrame {
 
             if (result == JOptionPane.YES_OPTION) {
                 dispose();
+                System.exit(0);
             }
         });
         return closeWindowButton;
@@ -142,7 +180,7 @@ public class MainApplicationFrame extends JFrame {
             UIManager.setLookAndFeel(className);
             SwingUtilities.updateComponentTreeUI(this);
         } catch (ClassNotFoundException | InstantiationException
-                 | IllegalAccessException | UnsupportedLookAndFeelException e) {
+                 | IllegalAccessException | UnsupportedLookAndFeelException eZ) {
             // just ignore
         }
     }
