@@ -52,9 +52,9 @@ public class MainApplicationFrame extends JFrame {
         JButton maximizeButton = new JButton("Развернуть");
 
         // Обработчики кнопок
-        closeButton.addActionListener(e -> System.exit(0));
-        minimizeButton.addActionListener(e -> setState(JFrame.ICONIFIED));
-        maximizeButton.addActionListener(e ->
+        closeButton.addActionListener(_ -> System.exit(0));
+        minimizeButton.addActionListener(_ -> setState(JFrame.ICONIFIED));
+        maximizeButton.addActionListener(_ ->
                 setExtendedState(getExtendedState() == JFrame.MAXIMIZED_BOTH ? JFrame.NORMAL : JFrame.MAXIMIZED_BOTH));
 
         // Панель кнопок справа
@@ -106,7 +106,7 @@ public class MainApplicationFrame extends JFrame {
 
     private JMenuItem createSystemLookAndFeel() {
         JMenuItem systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
-        systemLookAndFeel.addActionListener((event) -> {
+        systemLookAndFeel.addActionListener((_) -> {
             setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             this.invalidate();
         });
@@ -116,7 +116,7 @@ public class MainApplicationFrame extends JFrame {
 
     private JMenuItem createCrossplatformLookAndFeel() {
         JMenuItem crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
-        crossplatformLookAndFeel.addActionListener((event) -> {
+        crossplatformLookAndFeel.addActionListener((_) -> {
             setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
             this.invalidate();
         });
@@ -126,16 +126,14 @@ public class MainApplicationFrame extends JFrame {
 
     private JMenuItem createAddLogMessageItem() {
         JMenuItem addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
-        addLogMessageItem.addActionListener((event) -> {
-            Logger.debug("Новая строка");
-        });
+        addLogMessageItem.addActionListener((_) -> Logger.debug("Новая строка"));
 
         return addLogMessageItem;
     }
 
     private JButton createCloseWindowButton() {
         JButton closeWindowButton = new JButton("Закрыть");
-        closeWindowButton.addActionListener((event) -> {
+        closeWindowButton.addActionListener((_) -> {
             int result = JOptionPane.showConfirmDialog(null, "Закрыть приложение?", "Выберите действие", JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.YES_OPTION) {
