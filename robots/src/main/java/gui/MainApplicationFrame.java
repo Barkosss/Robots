@@ -136,7 +136,7 @@ public class MainApplicationFrame extends JFrame {
     private JButton createCloseWindowButton() {
         JButton closeWindowButton = new JButton("Закрыть");
         closeWindowButton.addActionListener((event) -> {
-            int result = JOptionPane.showConfirmDialog(null, "Закрыть приложение?");
+            int result = JOptionPane.showConfirmDialog(null, "Закрыть приложение?", "Выберите действие", JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.YES_OPTION) {
                 dispose();
