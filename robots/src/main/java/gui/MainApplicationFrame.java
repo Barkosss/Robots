@@ -23,9 +23,7 @@ public class MainApplicationFrame extends JFrame {
         //of the screen.
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds(inset, inset,
-                screenSize.width - inset * 2,
-                screenSize.height - inset * 2);
+        setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
         setContentPane(desktopPane);
 
         LogWindow logWindow = createLogWindow();
@@ -81,6 +79,35 @@ public class MainApplicationFrame extends JFrame {
         frame.setVisible(true);
     }
 
+//    protected JMenuBar createMenuBar() {
+//        JMenuBar menuBar = new JMenuBar();
+//
+//        //Set up the lone menu.
+//        JMenu menu = new JMenu("Document");
+//        menu.setMnemonic(KeyEvent.VK_D);
+//        menuBar.add(menu);
+//
+//        //Set up the first menu item.
+//        JMenuItem menuItem = new JMenuItem("New");
+//        menuItem.setMnemonic(KeyEvent.VK_N);
+//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+//                KeyEvent.VK_N, ActionEvent.ALT_MASK));
+//        menuItem.setActionCommand("new");
+//        menuItem.addActionListener(this);
+//        menu.add(menuItem);
+//
+//        //Set up the second menu item.
+//        menuItem = new JMenuItem("Quit");
+//        menuItem.setMnemonic(KeyEvent.VK_Q);
+//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+//                KeyEvent.VK_Q, ActionEvent.ALT_MASK));
+//        menuItem.setActionCommand("quit");
+//        menuItem.addActionListener(this);
+//        menu.add(menuItem);
+//
+//        return menuBar;
+//    }
+
     private JMenuBar generateMenuBar() {
         JMenu lookAndFeelMenu = new JMenu("Режим отображения");
         lookAndFeelMenu.setMnemonic(KeyEvent.VK_V);
@@ -134,7 +161,8 @@ public class MainApplicationFrame extends JFrame {
     private JButton createCloseWindowButton() {
         JButton closeWindowButton = new JButton("Закрыть");
         closeWindowButton.addActionListener((_) -> {
-            int result = JOptionPane.showConfirmDialog(null, "Закрыть приложение?", "Выберите действие", JOptionPane.YES_NO_OPTION);
+            int result = JOptionPane.showConfirmDialog(null, "Закрыть приложение?",
+                    "Выберите действие", JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.YES_OPTION) {
                 dispose();
