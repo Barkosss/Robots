@@ -112,8 +112,8 @@ public class GameVisualizer extends JPanel {
         }
         m_robotPositionX = newX;
         m_robotPositionY = newY;
-        /* asNormalizedRadians - не атомарная операция
-         * Используем synchronized чтобы не было изменение переменной другим потоком
+        /* asNormalizedRadians - не атомарная операция используем synchronized,
+         * чтобы не было изменение переменной другим потоком
          */
         synchronized (robotLock) {
             m_robotDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration);
