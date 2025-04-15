@@ -165,7 +165,6 @@ public class MainApplicationFrame extends JFrame {
                     "Выберите действие", JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.YES_OPTION) {
-                dispose();
                 System.exit(0);
             }
         });

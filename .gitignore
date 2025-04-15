@@ -4,3 +4,4 @@ out
 /robots/.settings
 /robots/bin
 eclipse.bat
+*.iml
