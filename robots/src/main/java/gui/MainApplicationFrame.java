@@ -5,6 +5,14 @@ import log.Logger;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOError;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Properties;
 
 /**
  * Что требуется сделать:
@@ -13,6 +21,8 @@ import java.awt.event.KeyEvent;
  */
 public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
+    private final String CONFIG_FILE = System.getProperty("user.home") + File.separator + ".properties";
+
 
     public MainApplicationFrame() {
         JFrame frame = new JFrame();
@@ -165,6 +175,7 @@ public class MainApplicationFrame extends JFrame {
                     "Выберите действие", JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.YES_OPTION) {
+                saveWindowsState();
                 System.exit(0);
             }
         });
@@ -179,5 +190,29 @@ public class MainApplicationFrame extends JFrame {
                  | IllegalAccessException | UnsupportedLookAndFeelException eZ) {
             // just ignore
         }
+    }
+
+    private void saveWindowsState() {
+        System.out.println("Start save window");
+        Properties props = System.getProperties();
+
+        props.setProperty("main.x", String.valueOf(getX()));
+        props.setProperty("main.y", String.valueOf(getY()));
+        props.setProperty("main.width", String.valueOf(getWidth()));
+        props.setProperty("main.height", String.valueOf(getHeight()));
+        props.setProperty("main.state", String.valueOf(getExtendedState()));
+
+        try (OutputStream outputStream = new FileOutputStream(CONFIG_FILE)) {
+            props.store(outputStream, "Window State");
+
+        } catch (IOException err) {
+            System.out.printf("[ERROR] Save Window State: %s", err);
+        }
+    }
+
+    private void loadWindowsState() {
+        File fileProperties = new File(CONFIG_FILE);
+
+        // ...
     }
 }
