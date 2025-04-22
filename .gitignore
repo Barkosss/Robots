@@ -6,3 +6,4 @@ out
 eclipse.bat
 *.iml
 .properties
+/robots/src/main/resources
