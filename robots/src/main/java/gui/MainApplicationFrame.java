@@ -20,7 +20,7 @@ import java.util.Properties;
  */
 public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private final String CONFIG_FILE = "robots/src/main/resources/.properties";
+    private final String CONFIG_FILE = "robots/src/main/resources/windows.properties";
 
     private enum EnumWindow {
         LOG("log"), GAME("game");
