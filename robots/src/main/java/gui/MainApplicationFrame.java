@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -177,7 +178,13 @@ public class MainApplicationFrame extends JFrame {
         // Сохраняем состояние внутренних окон (LogWindow, GameWindow)
         JInternalFrame[] frames = desktopPane.getAllFrames();
         for (JInternalFrame frame : frames) {
-            String windowKey = getWindowKey(frame).getValue(); // Генерируем ключ для каждого окна
+            Optional<WindowType> optionalWindowType = getWindowKey(frame);
+
+            if (optionalWindowType.isEmpty()) {
+                continue;
+            }
+
+            String windowKey = optionalWindowType.get().getValue();
 
             Rectangle bounds = frame.getBounds();
             props.setProperty(windowKey + ".x", String.valueOf(bounds.x));
@@ -222,7 +229,13 @@ public class MainApplicationFrame extends JFrame {
             // Восстанавливаем состояние внутренних окон
             JInternalFrame[] frames = desktopPane.getAllFrames();
             for (JInternalFrame frame : frames) {
-                String windowKey = getWindowKey(frame).getValue();
+                Optional<WindowType> optionalWindowType = getWindowKey(frame);
+
+                if (optionalWindowType.isEmpty()) {
+                    continue;
+                }
+
+                String windowKey = optionalWindowType.get().getValue();
 
                 // Восстанавливаем только сохраненные окна (log, game)
                 int frameX = Integer.parseInt(props.getProperty(windowKey + ".x", "100"));
@@ -250,13 +263,13 @@ public class MainApplicationFrame extends JFrame {
         }
     }
 
-    private WindowType getWindowKey(JInternalFrame frame) {
+    private Optional<WindowType> getWindowKey(JInternalFrame frame) {
         if (frame instanceof LogWindow) {
-            return WindowType.LOG;
+            return Optional.of(WindowType.LOG);
         } else if (frame instanceof GameWindow) {
-            return WindowType.GAME;
+            return Optional.of(WindowType.GAME);
         }
 
-        return null;
+        return Optional.empty();
     }
 }
