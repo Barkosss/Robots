@@ -22,10 +22,10 @@ public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final String CONFIG_FILE = "robots/src/main/resources/windows.properties";
 
-    private enum EnumWindow {
+    private enum WindowType {
         LOG("log"), GAME("game");
 
-        EnumWindow(String game) {
+        WindowType(String game) {
             this.game = game;
         }
 
@@ -250,11 +250,11 @@ public class MainApplicationFrame extends JFrame {
         }
     }
 
-    private EnumWindow getWindowKey(JInternalFrame frame) {
+    private WindowType getWindowKey(JInternalFrame frame) {
         if (frame instanceof LogWindow) {
-            return EnumWindow.LOG;
+            return WindowType.LOG;
         } else if (frame instanceof GameWindow) {
-            return EnumWindow.GAME;
+            return WindowType.GAME;
         }
 
         return null;
