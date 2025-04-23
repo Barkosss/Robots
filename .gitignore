@@ -5,4 +5,3 @@ out
 /robots/bin
 eclipse.bat
 *.iml
-/robots/src/main/resources/windows.properties
