@@ -159,6 +159,7 @@ public class MainApplicationFrame extends JFrame {
         try {
             UIManager.setLookAndFeel(className);
             SwingUtilities.updateComponentTreeUI(this);
+
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
                  UnsupportedLookAndFeelException eZ) {
             // just ignore
