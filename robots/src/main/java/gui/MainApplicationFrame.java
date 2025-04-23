@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,7 +22,7 @@ import java.util.Properties;
  */
 public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private final String CONFIG_FILE = "robots/src/main/resources/windows.properties";
+    private final String CONFIG_FILE = System.getProperty("user.home") + File.separator + "windows.properties";
 
     private enum WindowType {
         LOG("log"), GAME("game");
