@@ -199,6 +199,7 @@ public class MainApplicationFrame extends JFrame {
             props.store(outputStream, "Window State");
 
         } catch (IOException err) {
+            Logger.error(String.format("[ERROR] Save Window State: %s", err));
             System.out.printf("[ERROR] Save Window State: %s", err);
         }
     }
@@ -259,6 +260,7 @@ public class MainApplicationFrame extends JFrame {
             }
 
         } catch (IOException | NumberFormatException err) {
+            Logger.debug(String.format("[WARN] Load Window State: %s", err));
             System.out.printf("[WARN] Load Window State: %s%n", err);
         }
     }
