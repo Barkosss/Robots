@@ -5,6 +5,15 @@ import log.Logger;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyVetoException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Optional;
+import java.util.Properties;
 
 /**
  * Что требуется сделать:
@@ -13,24 +22,29 @@ import java.awt.event.KeyEvent;
  */
 public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
+    private final String CONFIG_FILE = System.getProperty("user.home") + File.separator + "windows.properties";
+
+    private enum WindowType {
+        LOG("log"), GAME("game");
+
+        WindowType(String game) {
+            this.game = game;
+        }
+
+        private final String game;
+
+        public String getValue() {
+            return game;
+        }
+    }
 
     public MainApplicationFrame() {
-        JFrame frame = new JFrame();
-        frame.setState(Frame.ICONIFIED);
-        frame.setUndecorated(true);
-
-        //Make the big window be indented 50 pixels from each edge
-        //of the screen.
-        int inset = 50;
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
         setContentPane(desktopPane);
 
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
 
         GameWindow gameWindow = new GameWindow();
-        gameWindow.setSize(400, 400);
         addWindow(gameWindow);
 
         setJMenuBar(generateMenuBar());
@@ -38,10 +52,13 @@ public class MainApplicationFrame extends JFrame {
 
         // Панель заголовка
         JPanel titleBar = new JPanel();
+        titleBar.setPreferredSize(new Dimension(getWidth(), 30));
+        titleBar.add(getButtonPanel(), BorderLayout.EAST);
+        add(titleBar, BorderLayout.NORTH);
 
-        JPanel buttonPanel = getButtonPanel();
+        loadWindowsState();
 
-        titleBar.add(buttonPanel, BorderLayout.EAST);
+        setVisible(true);
     }
 
     private JPanel getButtonPanel() {
@@ -52,8 +69,7 @@ public class MainApplicationFrame extends JFrame {
         // Обработчики кнопок
         closeButton.addActionListener(_ -> System.exit(0));
         minimizeButton.addActionListener(_ -> setState(JFrame.ICONIFIED));
-        maximizeButton.addActionListener(_ ->
-                setExtendedState(getExtendedState() == JFrame.MAXIMIZED_BOTH ? JFrame.NORMAL : JFrame.MAXIMIZED_BOTH));
+        maximizeButton.addActionListener(_ -> setExtendedState(getExtendedState() == JFrame.MAXIMIZED_BOTH ? JFrame.NORMAL : JFrame.MAXIMIZED_BOTH));
 
         // Панель кнопок справа
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 2));
@@ -67,9 +83,7 @@ public class MainApplicationFrame extends JFrame {
     protected LogWindow createLogWindow() {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
         logWindow.setLocation(10, 10);
-        logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
-        logWindow.pack();
         Logger.debug("Протокол работает");
         return logWindow;
     }
@@ -78,35 +92,6 @@ public class MainApplicationFrame extends JFrame {
         desktopPane.add(frame);
         frame.setVisible(true);
     }
-
-//    protected JMenuBar createMenuBar() {
-//        JMenuBar menuBar = new JMenuBar();
-//
-//        //Set up the lone menu.
-//        JMenu menu = new JMenu("Document");
-//        menu.setMnemonic(KeyEvent.VK_D);
-//        menuBar.add(menu);
-//
-//        //Set up the first menu item.
-//        JMenuItem menuItem = new JMenuItem("New");
-//        menuItem.setMnemonic(KeyEvent.VK_N);
-//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-//                KeyEvent.VK_N, ActionEvent.ALT_MASK));
-//        menuItem.setActionCommand("new");
-//        menuItem.addActionListener(this);
-//        menu.add(menuItem);
-//
-//        //Set up the second menu item.
-//        menuItem = new JMenuItem("Quit");
-//        menuItem.setMnemonic(KeyEvent.VK_Q);
-//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-//                KeyEvent.VK_Q, ActionEvent.ALT_MASK));
-//        menuItem.setActionCommand("quit");
-//        menuItem.addActionListener(this);
-//        menu.add(menuItem);
-//
-//        return menuBar;
-//    }
 
     private JMenuBar generateMenuBar() {
         JMenu lookAndFeelMenu = new JMenu("Режим отображения");
@@ -161,10 +146,10 @@ public class MainApplicationFrame extends JFrame {
     private JButton createCloseWindowButton() {
         JButton closeWindowButton = new JButton("Закрыть");
         closeWindowButton.addActionListener((_) -> {
-            int result = JOptionPane.showConfirmDialog(null, "Закрыть приложение?",
-                    "Выберите действие", JOptionPane.YES_NO_OPTION);
+            int result = JOptionPane.showConfirmDialog(null, "Закрыть приложение?", "Выберите действие", JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.YES_OPTION) {
+                saveWindowsState();
                 System.exit(0);
             }
         });
@@ -175,9 +160,119 @@ public class MainApplicationFrame extends JFrame {
         try {
             UIManager.setLookAndFeel(className);
             SwingUtilities.updateComponentTreeUI(this);
-        } catch (ClassNotFoundException | InstantiationException
-                 | IllegalAccessException | UnsupportedLookAndFeelException eZ) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                 UnsupportedLookAndFeelException eZ) {
             // just ignore
         }
+    }
+
+    private void saveWindowsState() {
+        Properties props = new Properties();
+
+        // Сохраняем состояние главного окна
+        props.setProperty("main.x", String.valueOf(getX()));
+        props.setProperty("main.y", String.valueOf(getY()));
+        props.setProperty("main.width", String.valueOf(getWidth()));
+        props.setProperty("main.height", String.valueOf(getHeight()));
+        props.setProperty("main.state", String.valueOf(getExtendedState()));
+
+        // Сохраняем состояние внутренних окон (LogWindow, GameWindow)
+        JInternalFrame[] frames = desktopPane.getAllFrames();
+        for (JInternalFrame frame : frames) {
+            Optional<WindowType> optionalWindowType = getWindowKey(frame);
+
+            if (optionalWindowType.isEmpty()) {
+                continue;
+            }
+
+            String windowKey = optionalWindowType.get().getValue();
+
+            Rectangle bounds = frame.getBounds();
+            props.setProperty(windowKey + ".x", String.valueOf(bounds.x));
+            props.setProperty(windowKey + ".y", String.valueOf(bounds.y));
+            props.setProperty(windowKey + ".width", String.valueOf(bounds.width));
+            props.setProperty(windowKey + ".height", String.valueOf(bounds.height));
+            props.setProperty(windowKey + ".icon", String.valueOf(frame.isIcon()));
+            props.setProperty(windowKey + ".max", String.valueOf(frame.isMaximum()));
+        }
+
+        try (OutputStream outputStream = new FileOutputStream(CONFIG_FILE)) {
+            props.store(outputStream, "Window State");
+
+        } catch (IOException err) {
+            Logger.error(String.format("[ERROR] Save Window State: %s", err));
+            System.out.printf("[ERROR] Save Window State: %s", err);
+        }
+    }
+
+    private void loadWindowsState() {
+        Properties props = new Properties();
+
+        try (InputStream input = new FileInputStream(CONFIG_FILE)) {
+            props.load(input);
+
+            // Восстанавливаем состояние главного окна
+            int x = Integer.parseInt(props.getProperty("main.x", "100"));
+            int y = Integer.parseInt(props.getProperty("main.y", "100"));
+            int width = Integer.parseInt(props.getProperty("main.width", "800"));
+            int height = Integer.parseInt(props.getProperty("main.height", "600"));
+            int state = Integer.parseInt(props.getProperty("main.state", "0"));
+
+            if (state == JFrame.NORMAL) {
+                setBounds(x, y, width, height);
+            }
+
+            if (state == JFrame.NORMAL && getExtendedState() != JFrame.NORMAL) {
+                setBounds(x, y, width, height);
+            }
+
+            setExtendedState(state);
+
+            // Восстанавливаем состояние внутренних окон
+            JInternalFrame[] frames = desktopPane.getAllFrames();
+            for (JInternalFrame frame : frames) {
+                Optional<WindowType> optionalWindowType = getWindowKey(frame);
+
+                if (optionalWindowType.isEmpty()) {
+                    continue;
+                }
+
+                String windowKey = optionalWindowType.get().getValue();
+
+                // Восстанавливаем только сохраненные окна (log, game)
+                int frameX = Integer.parseInt(props.getProperty(windowKey + ".x", "100"));
+                int frameY = Integer.parseInt(props.getProperty(windowKey + ".y", "100"));
+                int frameWidth = Integer.parseInt(props.getProperty(windowKey + ".width", "400"));
+                int frameHeight = Integer.parseInt(props.getProperty(windowKey + ".height", "300"));
+                boolean isIcon = Boolean.parseBoolean(props.getProperty(windowKey + ".icon", "false"));
+                boolean isMax = Boolean.parseBoolean(props.getProperty(windowKey + ".max", "false"));
+
+                try {
+                    if (isIcon) {
+                        frame.setIcon(true);
+                    } else if (isMax) {
+                        frame.setMaximum(true);
+                    } else {
+                        frame.setBounds(frameX, frameY, frameWidth, frameHeight);
+                    }
+                } catch (PropertyVetoException ignore) {
+                    // Ignore
+                }
+            }
+
+        } catch (IOException | NumberFormatException err) {
+            Logger.debug(String.format("[WARN] Load Window State: %s", err));
+            System.out.printf("[WARN] Load Window State: %s%n", err);
+        }
+    }
+
+    private Optional<WindowType> getWindowKey(JInternalFrame frame) {
+        if (frame instanceof LogWindow) {
+            return Optional.of(WindowType.LOG);
+        } else if (frame instanceof GameWindow) {
+            return Optional.of(WindowType.GAME);
+        }
+
+        return Optional.empty();
     }
 }
