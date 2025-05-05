@@ -5,15 +5,6 @@ import log.Logger;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyVetoException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Optional;
-import java.util.Properties;
 
 /**
  * Что требуется сделать:
@@ -22,9 +13,9 @@ import java.util.Properties;
  */
 public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private final String CONFIG_FILE = System.getProperty("user.home") + File.separator + "windows.properties";
+    private final WindowStateManager windowStateManager = new WindowStateManager(desktopPane, this);
 
-    private enum WindowType {
+    public enum WindowType {
         LOG("log"), GAME("game");
 
         WindowType(String game) {
@@ -56,7 +47,7 @@ public class MainApplicationFrame extends JFrame {
         titleBar.add(getButtonPanel(), BorderLayout.EAST);
         add(titleBar, BorderLayout.NORTH);
 
-        loadWindowsState();
+        windowStateManager.loadWindowsState();
 
         setVisible(true);
     }
@@ -149,7 +140,7 @@ public class MainApplicationFrame extends JFrame {
             int result = JOptionPane.showConfirmDialog(null, "Закрыть приложение?", "Выберите действие", JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.YES_OPTION) {
-                saveWindowsState();
+                windowStateManager.saveWindowsState(this);
                 System.exit(0);
             }
         });
@@ -164,115 +155,5 @@ public class MainApplicationFrame extends JFrame {
                  UnsupportedLookAndFeelException eZ) {
             // just ignore
         }
-    }
-
-    private void saveWindowsState() {
-        Properties props = new Properties();
-
-        // Сохраняем состояние главного окна
-        props.setProperty("main.x", String.valueOf(getX()));
-        props.setProperty("main.y", String.valueOf(getY()));
-        props.setProperty("main.width", String.valueOf(getWidth()));
-        props.setProperty("main.height", String.valueOf(getHeight()));
-        props.setProperty("main.state", String.valueOf(getExtendedState()));
-
-        // Сохраняем состояние внутренних окон (LogWindow, GameWindow)
-        JInternalFrame[] frames = desktopPane.getAllFrames();
-        for (JInternalFrame frame : frames) {
-            Optional<WindowType> optionalWindowType = getWindowKey(frame);
-
-            if (optionalWindowType.isEmpty()) {
-                continue;
-            }
-
-            String windowKey = optionalWindowType.get().getValue();
-
-            Rectangle bounds = frame.getBounds();
-            props.setProperty(windowKey + ".x", String.valueOf(bounds.x));
-            props.setProperty(windowKey + ".y", String.valueOf(bounds.y));
-            props.setProperty(windowKey + ".width", String.valueOf(bounds.width));
-            props.setProperty(windowKey + ".height", String.valueOf(bounds.height));
-            props.setProperty(windowKey + ".icon", String.valueOf(frame.isIcon()));
-            props.setProperty(windowKey + ".max", String.valueOf(frame.isMaximum()));
-        }
-
-        try (OutputStream outputStream = new FileOutputStream(CONFIG_FILE)) {
-            props.store(outputStream, "Window State");
-
-        } catch (IOException err) {
-            Logger.error(String.format("[ERROR] Save Window State: %s", err));
-            System.out.printf("[ERROR] Save Window State: %s", err);
-        }
-    }
-
-    private void loadWindowsState() {
-        Properties props = new Properties();
-
-        try (InputStream input = new FileInputStream(CONFIG_FILE)) {
-            props.load(input);
-
-            // Восстанавливаем состояние главного окна
-            int x = Integer.parseInt(props.getProperty("main.x", "100"));
-            int y = Integer.parseInt(props.getProperty("main.y", "100"));
-            int width = Integer.parseInt(props.getProperty("main.width", "800"));
-            int height = Integer.parseInt(props.getProperty("main.height", "600"));
-            int state = Integer.parseInt(props.getProperty("main.state", "0"));
-
-            if (state == JFrame.NORMAL) {
-                setBounds(x, y, width, height);
-            }
-
-            if (state == JFrame.NORMAL && getExtendedState() != JFrame.NORMAL) {
-                setBounds(x, y, width, height);
-            }
-
-            setExtendedState(state);
-
-            // Восстанавливаем состояние внутренних окон
-            JInternalFrame[] frames = desktopPane.getAllFrames();
-            for (JInternalFrame frame : frames) {
-                Optional<WindowType> optionalWindowType = getWindowKey(frame);
-
-                if (optionalWindowType.isEmpty()) {
-                    continue;
-                }
-
-                String windowKey = optionalWindowType.get().getValue();
-
-                // Восстанавливаем только сохраненные окна (log, game)
-                int frameX = Integer.parseInt(props.getProperty(windowKey + ".x", "100"));
-                int frameY = Integer.parseInt(props.getProperty(windowKey + ".y", "100"));
-                int frameWidth = Integer.parseInt(props.getProperty(windowKey + ".width", "400"));
-                int frameHeight = Integer.parseInt(props.getProperty(windowKey + ".height", "300"));
-                boolean isIcon = Boolean.parseBoolean(props.getProperty(windowKey + ".icon", "false"));
-                boolean isMax = Boolean.parseBoolean(props.getProperty(windowKey + ".max", "false"));
-
-                try {
-                    if (isIcon) {
-                        frame.setIcon(true);
-                    } else if (isMax) {
-                        frame.setMaximum(true);
-                    } else {
-                        frame.setBounds(frameX, frameY, frameWidth, frameHeight);
-                    }
-                } catch (PropertyVetoException ignore) {
-                    // Ignore
-                }
-            }
-
-        } catch (IOException | NumberFormatException err) {
-            Logger.debug(String.format("[WARN] Load Window State: %s", err));
-            System.out.printf("[WARN] Load Window State: %s%n", err);
-        }
-    }
-
-    private Optional<WindowType> getWindowKey(JInternalFrame frame) {
-        if (frame instanceof LogWindow) {
-            return Optional.of(WindowType.LOG);
-        } else if (frame instanceof GameWindow) {
-            return Optional.of(WindowType.GAME);
-        }
-
-        return Optional.empty();
     }
 }
