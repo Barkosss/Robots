@@ -52,6 +52,7 @@ public class WindowStateManager {
             config.setProperty(windowKey + ".height", String.valueOf(bounds.height));
             config.setProperty(windowKey + ".icon", String.valueOf(frame.isIcon()));
             config.setProperty(windowKey + ".max", String.valueOf(frame.isMaximum()));
+            config.setProperty(windowKey + ".order", String.valueOf(frame));
         }
 
         try (OutputStream outputStream = new FileOutputStream(CONFIG_FILE)) {
