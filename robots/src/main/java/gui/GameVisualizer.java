@@ -81,15 +81,6 @@ public class GameVisualizer extends JPanel {
             return;
         }
         double angleToTarget = angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
-        /*
-        double angularVelocity = 0;
-        if (angleToTarget > m_robotDirection) {
-            angularVelocity = maxAngularVelocity;
-        }
-        if (angleToTarget < m_robotDirection) {
-            angularVelocity = -maxAngularVelocity;
-        }*/
-
         double angleDiff = asNormalizedRadians(angleToTarget - m_robotDirection);
         double angularVelocity;
         if (angleDiff > Math.PI) {
