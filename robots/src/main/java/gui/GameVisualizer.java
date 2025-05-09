@@ -9,7 +9,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class GameVisualizer extends JPanel {
-
+    private final RobotModel model;
     private final Object robotLock = new Object();
 
     private volatile double m_robotPositionX = 100;
@@ -22,7 +22,8 @@ public class GameVisualizer extends JPanel {
     private static final double maxVelocity = 0.1;
     private static final double maxAngularVelocity = 0.001;
 
-    public GameVisualizer() {
+    public GameVisualizer(RobotModel model) {
+        this.model = model;
         Timer m_timer = new Timer("events generator", true);
 
         m_timer.schedule(new TimerTask() {
@@ -50,6 +51,10 @@ public class GameVisualizer extends JPanel {
     protected void setTargetPosition(Point p) {
         m_targetPositionX = p.x;
         m_targetPositionY = p.y;
+
+        if (model != null) {
+            model.setTargetPosition(p.x, p.y);
+        }
     }
 
     protected void onRedrawEvent() {
@@ -76,12 +81,25 @@ public class GameVisualizer extends JPanel {
             return;
         }
         double angleToTarget = angleTo(m_robotPositionX, m_robotPositionY, m_targetPositionX, m_targetPositionY);
+        /*
         double angularVelocity = 0;
         if (angleToTarget > m_robotDirection) {
             angularVelocity = maxAngularVelocity;
         }
         if (angleToTarget < m_robotDirection) {
             angularVelocity = -maxAngularVelocity;
+        }*/
+
+        double angleDiff = asNormalizedRadians(angleToTarget - m_robotDirection);
+        double angularVelocity;
+        if (angleDiff > Math.PI) {
+            angularVelocity = -maxAngularVelocity;
+        } else if (angleDiff > 0.01) {  // Небольшой порог для стабилизации
+            angularVelocity = maxAngularVelocity;
+        } else if (angleDiff < -0.01) {
+            angularVelocity = -maxAngularVelocity;
+        } else {
+            angularVelocity = 0;
         }
 
         moveRobot(maxVelocity, angularVelocity, 10);
@@ -117,6 +135,10 @@ public class GameVisualizer extends JPanel {
          */
         synchronized (robotLock) {
             m_robotDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration);
+        }
+
+        if (model != null) {
+            model.setRobotPosition(newX, newY, m_robotDirection);
         }
     }
 
