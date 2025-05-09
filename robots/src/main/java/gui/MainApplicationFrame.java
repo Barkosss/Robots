@@ -32,11 +32,17 @@ public class MainApplicationFrame extends JFrame {
     public MainApplicationFrame() {
         setContentPane(desktopPane);
 
+        RobotModel robotModel = new RobotModel();
+
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
 
-        GameWindow gameWindow = new GameWindow();
+        GameWindow gameWindow = new GameWindow(robotModel);
         addWindow(gameWindow);
+
+        RobotCoordinatesWindow coordinatesWindow = new RobotCoordinatesWindow(robotModel);
+        coordinatesWindow.setBounds(620, 10, 250, 100);
+        addWindow(coordinatesWindow);
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
