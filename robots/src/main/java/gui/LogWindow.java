@@ -6,8 +6,6 @@ import log.LogWindowSource;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class LogWindow extends JInternalFrame implements LogChangeListener {
     private final LogWindowSource m_logSource;
@@ -27,7 +25,7 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
 
         // Создаем кнопку "Закрыть"
         JButton closeButton = new JButton("Закрыть");
-        closeButton.addActionListener((event) -> {
+        closeButton.addActionListener((_) -> {
             int result = JOptionPane.showConfirmDialog(null, "Закрыть приложение?");
 
             if (result == JOptionPane.YES_OPTION) {
@@ -37,23 +35,17 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
 
         // Создаем кнопку "Свернуть"
         JButton minimizeButton = new JButton("Свернуть");
-        minimizeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setState(JFrame.ICONIFIED); // Свернуть окно
-            }
+        minimizeButton.addActionListener(_ -> {
+            frame.setState(JFrame.ICONIFIED); // Свернуть окно
         });
 
         // Создаем кнопку "Развернуть"
         JButton maximizeButton = new JButton("Развернуть");
-        maximizeButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (frame.getExtendedState() == JFrame.MAXIMIZED_BOTH) {
-                    frame.setExtendedState(JFrame.NORMAL); // Восстановить размер окна
-                } else {
-                    frame.setExtendedState(JFrame.MAXIMIZED_BOTH); // Развернуть окно
-                }
+        maximizeButton.addActionListener(_ -> {
+            if (frame.getExtendedState() == JFrame.MAXIMIZED_BOTH) {
+                frame.setExtendedState(JFrame.NORMAL); // Восстановить размер окна
+            } else {
+                frame.setExtendedState(JFrame.MAXIMIZED_BOTH); // Развернуть окно
             }
         });
 
