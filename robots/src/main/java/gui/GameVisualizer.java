@@ -85,7 +85,7 @@ public class GameVisualizer extends JPanel {
         double angularVelocity;
         if (angleDiff > Math.PI) {
             angularVelocity = -maxAngularVelocity;
-        } else if (angleDiff > 0.01) {  // Небольшой порог для стабилизации
+        } else if (angleDiff > 0.01) {
             angularVelocity = maxAngularVelocity;
         } else if (angleDiff < -0.01) {
             angularVelocity = -maxAngularVelocity;
